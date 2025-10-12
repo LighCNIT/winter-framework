@@ -21,6 +21,13 @@ import org.winterframework.beans.factory.config.BeanDefinition;
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory{
 
     /**
+     * Bean实例化策略
+     * 默认使用SimpleInstantiationStrategy（JDK反射方式）
+     * 可以通过setInstantiationStrategy()方法切换为Cglib方式
+     */
+    private InstantiationStrategy instantiationStrategy = new SimpleInstantiationStrategy();
+
+    /**
      * 创建Bean实例 - 实现父类的抽象方法
      * 
      * @param beanName Bean名称
@@ -55,7 +62,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         try {
             // 通过反射创建Bean实例
             // 使用无参构造方法创建对象（要求Bean必须有无参构造器）
-            bean = beanClass.newInstance();
+            bean = createBeanInstance(beanDefinition);
         } catch (Exception e) {
             // 实例化失败，抛出Bean异常
             throw new BeanException("Instantiation of bean failed", e);
@@ -66,5 +73,35 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         addSingleton(beanName, bean);
         
         return bean;
+    }
+
+    /**
+     * 创建Bean实例 - 使用实例化策略
+     * 委托给InstantiationStrategy执行具体的实例化逻辑
+     * 
+     * @param beanDefinition Bean定义信息
+     * @return 实例化后的Bean对象
+     */
+    protected Object createBeanInstance(BeanDefinition beanDefinition){
+        return getInstantiationStrategy().instantiate(beanDefinition);
+    }
+
+    /**
+     * 获取当前使用的实例化策略
+     * 
+     * @return 实例化策略对象
+     */
+    public InstantiationStrategy getInstantiationStrategy(){
+        return instantiationStrategy;
+    }
+
+    /**
+     * 设置实例化策略
+     * 可以动态切换不同的实例化方式（JDK反射 或 Cglib代理）
+     * 
+     * @param instantiationStrategy 实例化策略对象
+     */
+    public void setInstantiationStrategy(InstantiationStrategy instantiationStrategy){
+        this.instantiationStrategy = instantiationStrategy;
     }
 }
