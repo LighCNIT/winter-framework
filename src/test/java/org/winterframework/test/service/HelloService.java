@@ -1,4 +1,4 @@
-package org.winterframework.test;
+package org.winterframework.test.service;
 
 /**
  * @author Ligh

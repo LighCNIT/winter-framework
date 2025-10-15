@@ -1,6 +1,8 @@
 package org.winterframework.beans.factory.support;
 
+import cn.hutool.core.bean.BeanUtil;
 import org.winterframework.beans.BeanException;
+import org.winterframework.beans.factory.PropertyValue;
 import org.winterframework.beans.factory.config.BeanDefinition;
 
 /**
@@ -55,14 +57,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @return 创建的Bean实例
      */
     protected Object doCreateBean(String beanName, BeanDefinition beanDefinition){
-        // 从BeanDefinition中获取Bean的Class类型
-        Class beanClass = beanDefinition.getBeanClass();
         Object bean = null;
         
         try {
             // 通过反射创建Bean实例
             // 使用无参构造方法创建对象（要求Bean必须有无参构造器）
             bean = createBeanInstance(beanDefinition);
+            // 为bean填充属性
+            applyPropertyValues(beanName,bean,beanDefinition);
         } catch (Exception e) {
             // 实例化失败，抛出Bean异常
             throw new BeanException("Instantiation of bean failed", e);
@@ -84,6 +86,44 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      */
     protected Object createBeanInstance(BeanDefinition beanDefinition){
         return getInstantiationStrategy().instantiate(beanDefinition);
+    }
+
+    /**
+     * 为Bean应用属性值 - 实现属性注入
+     * 
+     * 这是属性注入的核心方法，负责将BeanDefinition中定义的属性值
+     * 通过反射设置到Bean实例的对应字段中
+     * 
+     * 实现原理：
+     * 1. 遍历BeanDefinition中的所有PropertyValue
+     * 2. 使用Hutool的BeanUtil.setFieldValue()方法设置字段值
+     * 3. 支持基本类型、包装类型、String等常见类型的自动转换
+     * 
+     * 技术特点：
+     * - 使用Hutool工具库简化反射操作
+     * - 支持字段名自动匹配（忽略大小写）
+     * - 提供详细的异常信息便于调试
+     * 
+     * @param beanName Bean名称，用于异常信息
+     * @param bean Bean实例，要设置属性的对象
+     * @param beanDefinition Bean定义，包含属性值信息
+     * @throws BeanException 属性设置失败时抛出
+     */
+    protected void applyPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition){
+        try {
+            // 遍历Bean定义中的所有属性值
+            for (PropertyValue propertyValue : beanDefinition.getPropertyValues().getPropertyValues()){
+                String name = propertyValue.getName();
+                Object value = propertyValue.getValue();
+                
+                // 使用Hutool工具库设置字段值
+                // 支持类型自动转换和字段名匹配
+                BeanUtil.setFieldValue(bean, name, value);
+            }
+        } catch (Exception ex) {
+            // 包装异常信息，便于定位问题
+            throw new BeanException("Error setting property values for bean: " + beanName, ex);
+        }
     }
 
     /**
