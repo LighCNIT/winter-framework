@@ -38,6 +38,14 @@ public class Person {
     private int age;
 
     /**
+     * 汽车
+     * 用于测试Bean之间的依赖注入功能
+     * 当Person需要依赖Car时，框架会自动注入Car实例
+     */
+    private Car car;
+
+
+    /**
      * 无参构造器
      * 框架创建Bean实例时需要使用
      */
@@ -82,6 +90,25 @@ public class Person {
     }
 
     /**
+     * 获取汽车
+     * 
+     * @return 汽车实例，可能为null
+     */
+    public Car getCar() {
+        return car;
+    }
+
+    /**
+     * 设置汽车
+     * 框架在依赖注入时会调用此方法
+     * 
+     * @param car 汽车实例
+     */
+    public void setCar(Car car) {
+        this.car = car;
+    }
+
+    /**
      * 重写toString方法，便于测试时观察对象状态
      * 
      * @return 格式化的Person对象信息
@@ -91,6 +118,7 @@ public class Person {
         return "Person{" +
                 "name='" + name + '\'' +
                 ", age=" + age +
+                ", car=" + car +
                 '}';
     }
 }

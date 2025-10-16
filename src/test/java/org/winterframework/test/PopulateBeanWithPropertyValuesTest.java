@@ -4,7 +4,9 @@ import org.junit.Test;
 import org.winterframework.beans.factory.PropertyValue;
 import org.winterframework.beans.factory.PropertyValues;
 import org.winterframework.beans.factory.config.BeanDefinition;
+import org.winterframework.beans.factory.config.BeanReference;
 import org.winterframework.beans.factory.support.DefaultListableBeanFactory;
+import org.winterframework.test.bean.Car;
 import org.winterframework.test.bean.Person;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -126,5 +128,63 @@ public class PopulateBeanWithPropertyValuesTest {
         assertThat(person.getAge()).isEqualTo(0); // age保持默认值
         
         System.out.println("✅ 部分属性注入测试通过！");
+    }
+
+    /**
+     * 测试Bean之间的依赖注入功能
+     * 
+     * 测试场景：
+     * 1. 创建Car Bean，设置brand属性为"porsche"
+     * 2. 创建Person Bean，设置基本属性（name、age）
+     * 3. 通过BeanReference让Person依赖Car
+     * 4. 验证框架能正确解析BeanReference并注入Car实例
+     * 
+     * 技术要点：
+     * - BeanReference的使用：PropertyValue("car", new BeanReference("car"))
+     * - 依赖解析：框架自动调用getBean("car")获取Car实例
+     * - 属性注入：将解析出的Car实例注入到Person的car属性中
+     * 
+     * 验证点：
+     * - Person实例创建成功
+     * - Person的基本属性正确注入（name="derek", age=18）
+     * - Car实例正确注入到Person的car属性中
+     * - Car的brand属性正确设置（brand="porsche"）
+     * 
+     * @throws Exception 测试过程中的异常
+     */
+    @Test
+    public void testPopulateBeanWithBean() throws Exception {
+        // 1. 创建BeanFactory
+        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+
+        // 2. 注册Car Bean定义
+        PropertyValues propertyValuesForCar = new PropertyValues();
+        propertyValuesForCar.addPropertyValue(new PropertyValue("brand", "porsche"));
+        BeanDefinition carBeanDefinition = new BeanDefinition(Car.class, propertyValuesForCar);
+        beanFactory.registerBeanDefinition("car", carBeanDefinition);
+
+        // 3. 注册Person Bean定义（包含对Car的依赖）
+        PropertyValues propertyValuesForPerson = new PropertyValues();
+        propertyValuesForPerson.addPropertyValue(new PropertyValue("name", "derek"));
+        propertyValuesForPerson.addPropertyValue(new PropertyValue("age", 18));
+        // 关键：使用BeanReference表示对Car的依赖
+        propertyValuesForPerson.addPropertyValue(new PropertyValue("car", new BeanReference("car")));
+        BeanDefinition beanDefinition = new BeanDefinition(Person.class, propertyValuesForPerson);
+        beanFactory.registerBeanDefinition("person", beanDefinition);
+
+        // 4. 获取Person Bean（框架会自动解析依赖并注入Car）
+        Person person = (Person) beanFactory.getBean("person");
+        System.out.println("创建的Person对象: " + person);
+        
+        // 5. 验证Person的基本属性注入
+        assertThat(person.getName()).isEqualTo("derek");
+        assertThat(person.getAge()).isEqualTo(18);
+        
+        // 6. 验证Car依赖注入
+        Car car = person.getCar();
+        assertThat(car).isNotNull();
+        assertThat(car.getBrand()).isEqualTo("porsche");
+        
+        System.out.println("✅ Bean依赖注入测试通过！");
     }
 }

@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.PropertyValue;
 import org.winterframework.beans.factory.config.BeanDefinition;
+import org.winterframework.beans.factory.config.BeanReference;
 
 /**
  * 具有自动装配能力的抽象Bean工厂
@@ -115,7 +116,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             for (PropertyValue propertyValue : beanDefinition.getPropertyValues().getPropertyValues()){
                 String name = propertyValue.getName();
                 Object value = propertyValue.getValue();
-                
+                if (value instanceof BeanReference) {
+                    // beanA依赖beanB，先实例化beanB
+                    BeanReference beanReference = (BeanReference) value;
+                    value = getBean(beanReference.getBeanName());
+                }
                 // 使用Hutool工具库设置字段值
                 // 支持类型自动转换和字段名匹配
                 BeanUtil.setFieldValue(bean, name, value);
