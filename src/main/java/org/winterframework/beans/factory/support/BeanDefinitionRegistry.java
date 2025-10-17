@@ -1,5 +1,6 @@
 package org.winterframework.beans.factory.support;
 
+import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.config.BeanDefinition;
 
 /**
@@ -22,4 +23,10 @@ public interface BeanDefinitionRegistry {
      * @param beanDefinition Bean的定义信息（元数据）
      */
     void registerBeanDefinition(String beanName, BeanDefinition beanDefinition);
+
+    BeanDefinition getBeanDefinition(String beanName) throws BeanException;
+
+    boolean containBeanDefinition(String beanName);
+
+    String[] getBeanDefinitionNames();
 }

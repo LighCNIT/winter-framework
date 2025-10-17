@@ -3,6 +3,7 @@ package org.winterframework.beans.factory.support;
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.BeanFactory;
 import org.winterframework.beans.factory.config.BeanDefinition;
+import org.winterframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
  * 抽象Bean工厂 - 模板方法模式的应用
@@ -21,7 +22,7 @@ import org.winterframework.beans.factory.config.BeanDefinition;
  * 1. 定义获取Bean的标准流程
  * 2. 整合单例缓存和Bean创建逻辑
  */
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory {
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
 
     /**
      * 获取Bean实例 - 模板方法
@@ -52,6 +53,11 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         
         // 第三步：根据BeanDefinition创建Bean实例
         return createBean(name, beanDefinition);
+    }
+
+    @Override
+    public <T> T getBean(String name, Class<T> requiredType) throws BeanException {
+        return ((T) getBean(name));
     }
 
     /**

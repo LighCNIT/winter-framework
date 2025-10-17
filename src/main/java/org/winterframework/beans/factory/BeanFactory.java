@@ -22,4 +22,6 @@ public interface BeanFactory {
      * @throws BeanException 如果Bean不存在或创建失败时抛出
      */
     Object getBean(String name) throws BeanException;
+
+    <T> T getBean(String name,Class<T> requiredType) throws BeanException;
 }
