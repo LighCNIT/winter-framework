@@ -1,11 +1,17 @@
 package org.winterframework.beans.factory.support;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ClassUtil;
+import cn.hutool.core.util.StrUtil;
 import org.winterframework.beans.BeanException;
+import org.winterframework.beans.factory.DisposableBean;
+import org.winterframework.beans.factory.InitializingBean;
 import org.winterframework.beans.factory.PropertyValue;
 import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.config.BeanPostProcessor;
 import org.winterframework.beans.factory.config.BeanReference;
+
+import java.lang.reflect.Method;
 
 /**
  * 具有自动装配能力的抽象Bean工厂
@@ -73,13 +79,39 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             // 实例化失败，抛出Bean异常
             throw new BeanException("Instantiation of bean failed", e);
         }
-        
+        //注册有销毁方法的bean
+        registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
         // 将创建好的Bean添加到单例缓存池中
         // 这样下次获取时可以直接从缓存中返回，实现单例模式
         addSingleton(beanName, bean);
         
         return bean;
     }
+
+    /**
+     * 注册可销毁的Bean（如果需要）
+     * 
+     * <p>检查Bean是否需要注册销毁逻辑，如果需要则创建DisposableBeanAdapter并注册。</p>
+     * 
+     * <p>注册条件：</p>
+     * <ul>
+     *   <li>Bean实现了DisposableBean接口</li>
+     *   <li>Bean配置了destroy-method属性</li>
+     * </ul>
+     * 
+     * <p>注册后的Bean会在ApplicationContext关闭时自动调用销毁方法。</p>
+     * 
+     * @param beanName Bean名称
+     * @param bean Bean实例
+     * @param beanDefinition Bean定义信息
+     */
+    protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
+        if (bean instanceof DisposableBean || StrUtil.isNotEmpty(beanDefinition.getDestroyMethodName())) {
+            super.registerDisposableBean(beanName, new DisposableBeanAdapter(bean, beanName, beanDefinition));
+        }
+    }
+
+
 
     /**
      * 初始化Bean - 执行BeanPostProcessor和初始化方法
@@ -109,8 +141,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
 
         // 执行Bean的初始化方法
-        // TODO: 后面会在此处执行bean的初始化方法
-        invokeInitMethods(beanName, wrappedBean, beanDefinition);
+        try {
+            invokeInitMethods(beanName, wrappedBean, beanDefinition);
+        } catch (Throwable ex) {
+            throw new BeanException("Invocation of init method of bean[" + beanName + "] failed", ex);
+        }
 
         // 执行BeanPostProcessor的后置处理
         // 此时Bean已完全初始化，可以进行后处理，如添加代理
@@ -258,8 +293,47 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
     }
 
-    protected void invokeInitMethods(String beanName, Object bean, BeanDefinition beanDefinition) {
-        //TODO 后面会实现
+    /**
+     * 执行Bean的初始化方法
+     * 
+     * <p>按照以下顺序执行初始化逻辑：</p>
+     * <ol>
+     *   <li>如果Bean实现了InitializingBean接口，先调用其afterPropertiesSet()方法</li>
+     *   <li>如果配置了init-method且不是"afterPropertiesSet"方法，则通过反射调用指定的初始化方法</li>
+     * </ol>
+     * 
+     * <p>注意事项：</p>
+     * <ul>
+     *   <li>避免重复调用：如果Bean实现了InitializingBean接口且init-method也是"afterPropertiesSet"，则不会重复调用</li>
+     *   <li>异常处理：如果初始化方法不存在，会抛出BeanException</li>
+     *   <li>反射调用：使用Hutool的ClassUtil.getPublicMethod()方法获取公共方法</li>
+     *   <li>执行时机：在BeanPostProcessor前置处理之后执行</li>
+     * </ul>
+     * 
+     * @param beanName Bean名称
+     * @param bean Bean实例
+     * @param beanDefinition Bean定义信息
+     * @throws Throwable 如果初始化过程中发生错误
+     */
+    protected void invokeInitMethods(String beanName, Object bean, BeanDefinition beanDefinition) throws Throwable {
+        // 1. 如果Bean实现了InitializingBean接口，先调用其afterPropertiesSet()方法
+        if (bean instanceof InitializingBean) {
+            ((InitializingBean) bean).afterPropertiesSet();
+        }
+        
+        // 2. 如果配置了init-method且不是"afterPropertiesSet"方法，则通过反射调用
+        String initMethodName = beanDefinition.getInitMethodName();
+        if (StrUtil.isNotEmpty(initMethodName) && 
+            !(bean instanceof InitializingBean && "afterPropertiesSet".equals(initMethodName))) {
+            
+            Method initMethod = ClassUtil.getPublicMethod(beanDefinition.getBeanClass(), initMethodName);
+            if (initMethod == null) {
+                throw new BeanException("Could not find an init method named '" + initMethodName + 
+                    "' on bean with name '" + beanName + "'");
+            }
+            initMethod.invoke(bean);
+        }
+        
         System.out.println("执行bean[" + beanName + "]的初始化方法");
     }
 

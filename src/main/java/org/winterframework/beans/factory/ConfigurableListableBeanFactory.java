@@ -1,6 +1,6 @@
-package org.winterframework.beans;
+package org.winterframework.beans.factory;
 
-import org.winterframework.beans.factory.ListableBeanFactory;
+import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.config.BeanPostProcessor;

@@ -1,7 +1,7 @@
 package org.winterframework.context.support;
 
 import org.winterframework.beans.BeanException;
-import org.winterframework.beans.ConfigurableListableBeanFactory;
+import org.winterframework.beans.factory.ConfigurableListableBeanFactory;
 import org.winterframework.beans.factory.support.DefaultListableBeanFactory;
 
 import java.util.Map;

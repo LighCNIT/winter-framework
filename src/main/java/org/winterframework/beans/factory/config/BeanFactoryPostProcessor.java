@@ -1,7 +1,7 @@
 package org.winterframework.beans.factory.config;
 
 import org.winterframework.beans.BeanException;
-import org.winterframework.beans.ConfigurableListableBeanFactory;
+import org.winterframework.beans.factory.ConfigurableListableBeanFactory;
 
 /**
  * BeanFactory后置处理器接口

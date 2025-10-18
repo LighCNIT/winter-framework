@@ -1,9 +1,8 @@
 package org.winterframework.beans.factory.support;
 
 import org.winterframework.beans.BeanException;
-import org.winterframework.beans.ConfigurableListableBeanFactory;
+import org.winterframework.beans.factory.ConfigurableListableBeanFactory;
 import org.winterframework.beans.factory.config.BeanDefinition;
-import org.winterframework.beans.factory.config.ConfigurableBeanFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -121,7 +120,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
      * 
      * @throws BeanException 如果Bean实例化过程中发生错误
      * @see #getBean(String)
-     * @see BeanPostProcessor
+     * @see org.winterframework.beans.factory.config.BeanPostProcessor
      */
     @Override
     public void preInstantiateSingletons() throws BeanException {

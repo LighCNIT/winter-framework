@@ -64,4 +64,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
      * @see BeanPostProcessor#postProcessAfterInitialization(Object, String)
      */
     void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
+
+    /**
+     * 销毁单例bean
+     */
+    void destroySingletons();
 }

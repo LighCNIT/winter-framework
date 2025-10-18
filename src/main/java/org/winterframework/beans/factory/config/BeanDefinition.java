@@ -29,6 +29,20 @@ public class BeanDefinition {
     private PropertyValues propertyValues;
 
     /**
+     * Bean初始化方法名称
+     * 用于指定Bean初始化时要调用的方法名
+     * 可以通过XML配置的init-method属性设置
+     */
+    private String initMethodName;
+
+    /**
+     * Bean销毁方法名称
+     * 用于指定Bean销毁时要调用的方法名
+     * 可以通过XML配置的destroy-method属性设置
+     */
+    private String destroyMethodName;
+
+    /**
      * 构造方法 - 只指定Bean类型
      * 
      * @param beanClass Bean的Class类型，不能为null
@@ -96,6 +110,42 @@ public class BeanDefinition {
      */
     public void addPropertyValue(String name, Object value) {
         this.propertyValues.addPropertyValue(new PropertyValue(name, value));
+    }
+
+    /**
+     * 获取Bean初始化方法名称
+     * 
+     * @return 初始化方法名称，可能为null
+     */
+    public String getInitMethodName() {
+        return initMethodName;
+    }
+
+    /**
+     * 设置Bean初始化方法名称
+     * 
+     * @param initMethodName 初始化方法名称
+     */
+    public void setInitMethodName(String initMethodName) {
+        this.initMethodName = initMethodName;
+    }
+
+    /**
+     * 获取Bean销毁方法名称
+     * 
+     * @return 销毁方法名称，可能为null
+     */
+    public String getDestroyMethodName() {
+        return destroyMethodName;
+    }
+
+    /**
+     * 设置Bean销毁方法名称
+     * 
+     * @param destroyMethodName 销毁方法名称
+     */
+    public void setDestroyMethodName(String destroyMethodName) {
+        this.destroyMethodName = destroyMethodName;
     }
 
     /**

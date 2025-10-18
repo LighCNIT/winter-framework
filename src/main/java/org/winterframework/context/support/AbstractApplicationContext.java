@@ -1,7 +1,7 @@
 package org.winterframework.context.support;
 
 import org.winterframework.beans.BeanException;
-import org.winterframework.beans.ConfigurableListableBeanFactory;
+import org.winterframework.beans.factory.ConfigurableListableBeanFactory;
 import org.winterframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.winterframework.beans.factory.config.BeanPostProcessor;
 import org.winterframework.context.ConfigurableApplicationContext;
@@ -208,5 +208,26 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
      * @return 可配置的BeanFactory实例
      */
     public abstract ConfigurableListableBeanFactory getBeanFactory();
+
+    public void close(){
+        doClose();
+    }
+
+    public void registerShutdownHook() {
+        Thread shutdownHook = new Thread() {
+            public void run() {
+                doClose();
+            }
+        };
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
+
+    }
+
+    protected void doClose(){
+        destroyBeans();
+    }
+    protected void destroyBeans(){
+        getBeanFactory().destroySingletons();
+    }
 
 }
