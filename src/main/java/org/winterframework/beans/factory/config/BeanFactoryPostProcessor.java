@@ -37,7 +37,6 @@ import org.winterframework.beans.ConfigurableListableBeanFactory;
  * 
  * @see ConfigurableListableBeanFactory
  * @see BeanDefinition
- * @see PropertyValue
  */
 public interface BeanFactoryPostProcessor {
 

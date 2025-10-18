@@ -15,4 +15,8 @@
     <bean id="car" class="org.winterframework.test.bean.Car">
         <property name="brand" value="porsche"/>
     </bean>
+
+    <bean class="org.winterframework.test.common.CustomBeanFactoryPostProcessor"/>
+
+    <bean class="org.winterframework.test.common.CustomerBeanPostProcessor"/>
 </beans>

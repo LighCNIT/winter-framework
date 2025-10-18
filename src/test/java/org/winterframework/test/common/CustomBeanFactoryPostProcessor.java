@@ -49,10 +49,11 @@ public class CustomBeanFactoryPostProcessor implements BeanFactoryPostProcessor 
      */
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeanException {
+        System.out.println("CustomBeanFactoryPostProcessor#postProcessBeanFactory");
         // 获取person Bean的BeanDefinition
         BeanDefinition beanDefinition = beanFactory.getBeanDefinition("person");
         PropertyValues propertyValues = beanDefinition.getPropertyValues();
-        
+
         // 将person的name属性改为ivy
         propertyValues.addPropertyValue(new PropertyValue("name", "ivy"));
     }
