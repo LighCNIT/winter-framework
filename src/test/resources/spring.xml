@@ -19,4 +19,6 @@
     <bean class="org.winterframework.test.common.CustomBeanFactoryPostProcessor"/>
 
     <bean class="org.winterframework.test.common.CustomerBeanPostProcessor"/>
+
+    <bean id="helloService" class="org.winterframework.test.service.HelloService"/>
 </beans>

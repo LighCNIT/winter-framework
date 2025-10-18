@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import org.winterframework.beans.BeanException;
+import org.winterframework.beans.factory.BeanFactoryAware;
 import org.winterframework.beans.factory.DisposableBean;
 import org.winterframework.beans.factory.InitializingBean;
 import org.winterframework.beans.factory.PropertyValue;
@@ -136,8 +137,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @throws BeanException 如果初始化过程中发生错误
      */
     protected Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) {
+        // 处理BeanFactoryAware接口
+        // 在BeanPostProcessor前置处理之前执行，确保BeanFactoryAware优先于ApplicationContextAware
+        if (bean instanceof BeanFactoryAware) {
+            ((BeanFactoryAware) bean).setBeanFactory(this);
+        }
+        
         // 执行BeanPostProcessor的前置处理
-        // 此时Bean已实例化但未初始化，可以进行预处理
+        // 此时Bean已实例化但未初始化，ApplicationContextAwareProcessor会在这里处理ApplicationContextAware
         Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
 
         // 执行Bean的初始化方法

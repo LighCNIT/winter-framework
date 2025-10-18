@@ -26,7 +26,7 @@ public interface BeanDefinitionRegistry {
 
     BeanDefinition getBeanDefinition(String beanName) throws BeanException;
 
-    boolean containBeanDefinition(String beanName);
+    boolean containsBeanDefinition(String beanName);
 
     String[] getBeanDefinitionNames();
 }
