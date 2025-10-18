@@ -73,12 +73,58 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
     @Override
     public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeanException {
-        return null;
+        Map<String, T> result = new HashMap<>();
+        beanDefinitionMap.forEach((beanName, beanDefinition) -> {
+            Class beanClass = beanDefinition.getBeanClass();
+            if (type.isAssignableFrom(beanClass)) {
+                T bean = (T) getBean(beanName);
+                result.put(beanName, bean);
+            }
+        });
+        return result;
     }
 
     @Override
     public String[] getBeanDefinitionNames() {
         Set<String> beanNames = beanDefinitionMap.keySet();
         return beanNames.toArray(new String[beanNames.size()]);
+    }
+
+    /**
+     * 提前实例化所有单例Bean
+     * 
+     * <p>遍历容器中所有的BeanDefinition，提前创建所有单例Bean的实例。
+     * 这通常在应用启动时调用，可以提前发现Bean创建过程中的问题。</p>
+     * 
+     * <p>执行流程：</p>
+     * <ol>
+     *   <li>遍历beanDefinitionMap中的所有Bean名称</li>
+     *   <li>对每个Bean名称调用getBean()方法</li>
+     *   <li>触发Bean的完整创建和初始化过程</li>
+     *   <li>包括BeanPostProcessor的执行</li>
+     * </ol>
+     * 
+     * <p>注意事项：</p>
+     * <ul>
+     *   <li>只实例化单例Bean，原型Bean不会提前创建</li>
+     *   <li>会触发BeanPostProcessor的执行</li>
+     *   <li>如果Bean创建失败，会抛出异常</li>
+     *   <li>重复调用是安全的，已创建的Bean会从缓存返回</li>
+     * </ul>
+     * 
+     * <p>使用场景：</p>
+     * <ul>
+     *   <li>应用启动时提前创建所有Bean</li>
+     *   <li>提前发现Bean创建过程中的问题</li>
+     *   <li>确保所有Bean都已正确初始化</li>
+     * </ul>
+     * 
+     * @throws BeanException 如果Bean实例化过程中发生错误
+     * @see #getBean(String)
+     * @see BeanPostProcessor
+     */
+    @Override
+    public void preInstantiateSingletons() throws BeanException {
+        beanDefinitionMap.keySet().forEach(this::getBean);
     }
 }

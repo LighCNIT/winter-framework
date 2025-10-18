@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.PropertyValue;
 import org.winterframework.beans.factory.config.BeanDefinition;
+import org.winterframework.beans.factory.config.BeanPostProcessor;
 import org.winterframework.beans.factory.config.BeanReference;
 
 /**
@@ -66,6 +67,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             bean = createBeanInstance(beanDefinition);
             // 为bean填充属性
             applyPropertyValues(beanName,bean,beanDefinition);
+            //执行bean的初始化方法和BeanPostProcessor的前置和后置处理方法
+            bean = initializeBean(beanName, bean, beanDefinition);
         } catch (Exception e) {
             // 实例化失败，抛出Bean异常
             throw new BeanException("Instantiation of bean failed", e);
@@ -77,6 +80,130 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         
         return bean;
     }
+
+    /**
+     * 初始化Bean - 执行BeanPostProcessor和初始化方法
+     * 
+     * <p>这是Bean初始化过程的核心方法，按照以下顺序执行：</p>
+     * <ol>
+     *   <li>执行BeanPostProcessor的前置处理</li>
+     *   <li>执行Bean的初始化方法</li>
+     *   <li>执行BeanPostProcessor的后置处理</li>
+     * </ol>
+     * 
+     * <p>BeanPostProcessor的作用：</p>
+     * <ul>
+     *   <li>前置处理：在Bean初始化前进行预处理，如修改属性值</li>
+     *   <li>后置处理：在Bean初始化后进行后处理，如添加代理</li>
+     * </ul>
+     * 
+     * @param beanName Bean名称
+     * @param bean Bean实例
+     * @param beanDefinition Bean定义信息
+     * @return 初始化后的Bean实例
+     * @throws BeanException 如果初始化过程中发生错误
+     */
+    protected Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) {
+        // 执行BeanPostProcessor的前置处理
+        // 此时Bean已实例化但未初始化，可以进行预处理
+        Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
+
+        // 执行Bean的初始化方法
+        // TODO: 后面会在此处执行bean的初始化方法
+        invokeInitMethods(beanName, wrappedBean, beanDefinition);
+
+        // 执行BeanPostProcessor的后置处理
+        // 此时Bean已完全初始化，可以进行后处理，如添加代理
+        wrappedBean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+        return wrappedBean;
+    }
+
+    /**
+     * 执行BeanPostProcessor的前置处理方法
+     * 
+     * <p>遍历所有注册的BeanPostProcessor，依次执行它们的postProcessBeforeInitialization方法。
+     * 这个方法会在Bean初始化方法执行之前被调用，用于对Bean进行预处理。</p>
+     * 
+     * <p>执行流程：</p>
+     * <ol>
+     *   <li>遍历所有注册的BeanPostProcessor</li>
+     *   <li>依次调用每个处理器的postProcessBeforeInitialization方法</li>
+     *   <li>如果某个处理器返回null，则停止后续处理并返回当前结果</li>
+     *   <li>将处理器的结果作为下一个处理器的输入</li>
+     * </ol>
+     * 
+     * <p>使用场景：</p>
+     * <ul>
+     *   <li>修改Bean的属性值</li>
+     *   <li>为Bean添加代理</li>
+     *   <li>实现Bean的增强功能</li>
+     *   <li>添加Bean的生命周期回调</li>
+     * </ul>
+     * 
+     * @param existingBean 已实例化但未初始化的Bean对象
+     * @param beanName Bean的名称
+     * @return 处理后的Bean对象，如果某个处理器返回null则使用当前结果
+     * @throws BeanException 如果处理过程中发生错误
+     * @see BeanPostProcessor#postProcessBeforeInitialization(Object, String)
+     */
+    public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
+            throws BeanException {
+        Object result = existingBean;
+        for (BeanPostProcessor processor : getBeanPostProcessors()) {
+            Object current = processor.postProcessBeforeInitialization(result, beanName);
+            if (current == null) {
+                return result;
+            }
+            result = current;
+        }
+        return result;
+    }
+
+    /**
+     * 执行BeanPostProcessor的后置处理方法
+     * 
+     * <p>遍历所有注册的BeanPostProcessor，依次执行它们的postProcessAfterInitialization方法。
+     * 这个方法会在Bean初始化方法执行之后被调用，用于对Bean进行后处理。</p>
+     * 
+     * <p>执行流程：</p>
+     * <ol>
+     *   <li>遍历所有注册的BeanPostProcessor</li>
+     *   <li>依次调用每个处理器的postProcessAfterInitialization方法</li>
+     *   <li>如果某个处理器返回null，则停止后续处理并返回当前结果</li>
+     *   <li>将处理器的结果作为下一个处理器的输入</li>
+     * </ol>
+     * 
+     * <p>使用场景：</p>
+     * <ul>
+     *   <li>为Bean添加代理（AOP的核心）</li>
+     *   <li>实现Bean的最终增强</li>
+     *   <li>注册Bean的监听器</li>
+     *   <li>完成Bean的最终配置</li>
+     * </ul>
+     * 
+     * <p>这是AOP代理创建的最佳时机，因为此时Bean已经完全初始化完成</p>
+     * 
+     * @param existingBean 已完全初始化的Bean对象
+     * @param beanName Bean的名称
+     * @return 处理后的Bean对象，如果某个处理器返回null则使用当前结果
+     * @throws BeanException 如果处理过程中发生错误
+     * @see BeanPostProcessor#postProcessAfterInitialization(Object, String)
+     */
+    public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
+            throws BeanException {
+
+        Object result = existingBean;
+        for (BeanPostProcessor processor : getBeanPostProcessors()) {
+            Object current = processor.postProcessAfterInitialization(result, beanName);
+            if (current == null) {
+                return result;
+            }
+            result = current;
+        }
+        return result;
+    }
+
+
 
     /**
      * 创建Bean实例 - 使用实例化策略
@@ -129,6 +256,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             // 包装异常信息，便于定位问题
             throw new BeanException("Error setting property values for bean: " + beanName, ex);
         }
+    }
+
+    protected void invokeInitMethods(String beanName, Object bean, BeanDefinition beanDefinition) {
+        //TODO 后面会实现
+        System.out.println("执行bean[" + beanName + "]的初始化方法");
     }
 
     /**

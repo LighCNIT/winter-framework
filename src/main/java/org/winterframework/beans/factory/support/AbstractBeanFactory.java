@@ -3,7 +3,11 @@ package org.winterframework.beans.factory.support;
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.BeanFactory;
 import org.winterframework.beans.factory.config.BeanDefinition;
+import org.winterframework.beans.factory.config.BeanPostProcessor;
 import org.winterframework.beans.factory.config.ConfigurableBeanFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 抽象Bean工厂 - 模板方法模式的应用
@@ -23,6 +27,25 @@ import org.winterframework.beans.factory.config.ConfigurableBeanFactory;
  * 2. 整合单例缓存和Bean创建逻辑
  */
 public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
+
+    /**
+     * Bean后置处理器列表
+     * 
+     * <p>存储所有注册的BeanPostProcessor，在Bean初始化过程中会被依次调用。
+     * 这些处理器可以在Bean初始化前后对Bean进行自定义处理。</p>
+     * 
+     * <p>使用场景：</p>
+     * <ul>
+     *   <li>修改Bean的属性值</li>
+     *   <li>为Bean添加代理（AOP的基础）</li>
+     *   <li>实现Bean的增强功能</li>
+     *   <li>添加Bean的生命周期回调</li>
+     * </ul>
+     * 
+     * <p>执行时机：在Bean实例化后、初始化前后</p>
+     */
+    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
+
 
     /**
      * 获取Bean实例 - 模板方法
@@ -79,4 +102,57 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      * @throws BeanException 如果Bean定义不存在
      */
     protected abstract BeanDefinition getBeanDefinition(String beanName) throws BeanException;
+
+    /**
+     * 添加Bean后置处理器
+     * 
+     * <p>向Bean工厂注册一个BeanPostProcessor，该处理器会在Bean实例化后、
+     * 初始化前后被调用，用于对Bean进行自定义处理。</p>
+     * 
+     * <p>实现特点：</p>
+     * <ul>
+     *   <li>如果处理器已存在，会先移除再添加（覆盖策略）</li>
+     *   <li>处理器按照添加顺序执行</li>
+     *   <li>支持动态添加和移除处理器</li>
+     * </ul>
+     * 
+     * <p>使用场景：</p>
+     * <ul>
+     *   <li>修改Bean的属性值</li>
+     *   <li>为Bean添加代理（AOP的基础）</li>
+     *   <li>实现Bean的增强功能</li>
+     *   <li>添加Bean的生命周期回调</li>
+     * </ul>
+     * 
+     * @param beanPostProcessor 要添加的Bean后置处理器
+     * @see BeanPostProcessor
+     * @see BeanPostProcessor#postProcessBeforeInitialization(Object, String)
+     * @see BeanPostProcessor#postProcessAfterInitialization(Object, String)
+     */
+    @Override
+    public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
+        // 有则覆盖：先移除已存在的处理器，再添加新的处理器
+        this.beanPostProcessors.remove(beanPostProcessor);
+        this.beanPostProcessors.add(beanPostProcessor);
+    }
+
+    /**
+     * 获取所有Bean后置处理器
+     * 
+     * <p>返回当前注册的所有BeanPostProcessor列表，这些处理器会在Bean
+     * 初始化过程中按照注册顺序依次执行。</p>
+     * 
+     * <p>注意事项：</p>
+     * <ul>
+     *   <li>返回的是处理器列表的引用，不是副本</li>
+     *   <li>处理器按照添加顺序执行</li>
+     *   <li>如果某个处理器返回null，会停止后续处理</li>
+     * </ul>
+     * 
+     * @return Bean后置处理器列表
+     * @see BeanPostProcessor
+     */
+    public List<BeanPostProcessor> getBeanPostProcessors() {
+        return this.beanPostProcessors;
+    }
 }
