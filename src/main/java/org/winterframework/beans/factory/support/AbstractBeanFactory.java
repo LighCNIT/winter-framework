@@ -2,12 +2,15 @@ package org.winterframework.beans.factory.support;
 
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.BeanFactory;
+import org.winterframework.beans.factory.FactoryBean;
 import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.config.BeanPostProcessor;
 import org.winterframework.beans.factory.config.ConfigurableBeanFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 抽象Bean工厂 - 模板方法模式的应用
@@ -46,6 +49,33 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      */
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
 
+    /**
+     * FactoryBean对象缓存池
+     * 
+     * <p>用于缓存单例FactoryBean的getObject()方法返回的对象，避免重复创建。</p>
+     * 
+     * <p>缓存策略：</p>
+     * <ul>
+     *   <li>单例FactoryBean：getObject()结果会被缓存，键为Bean名称</li>
+     *   <li>原型FactoryBean：不缓存，每次调用getObject()创建新实例</li>
+     * </ul>
+     * 
+     * <p>使用场景：</p>
+     * <ul>
+     *   <li>复杂对象的创建（如代理对象、连接池等）</li>
+     *   <li>需要特殊初始化逻辑的对象</li>
+     *   <li>创建成本较高的对象</li>
+     * </ul>
+     * 
+     * <p>注意事项：</p>
+     * <ul>
+     *   <li>只缓存单例FactoryBean的对象</li>
+     *   <li>缓存的对象与FactoryBean本身是分离的</li>
+     *   <li>容器关闭时缓存会被清空</li>
+     * </ul>
+     */
+    private final Map<String,Object> factoryBeanObjectCache = new HashMap<>();
+
 
     /**
      * 获取Bean实例 - 模板方法
@@ -62,20 +92,78 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      * @throws BeanException 如果Bean创建失败
      */
     @Override
-    public Object getBean(String name) throws BeanException{
+    public Object getBean(String name) throws BeanException {
         // 第一步：尝试从单例缓存池中获取Bean
-        Object bean = getSingleton(name);
-        if (bean != null){
+        Object sharedInstance = getSingleton(name);
+        if (sharedInstance != null) {
             // 缓存命中，直接返回
-            return bean;
+            return getObjectForBeanInstance(sharedInstance, name);
         }
-        
+
         // 第二步：缓存未命中，需要创建新的Bean实例
         // 先获取Bean的定义信息
         BeanDefinition beanDefinition = getBeanDefinition(name);
-        
+
         // 第三步：根据BeanDefinition创建Bean实例
-        return createBean(name, beanDefinition);
+        Object bean = createBean(name, beanDefinition);
+        return getObjectForBeanInstance(bean, name);
+    }
+
+    /**
+     * 处理FactoryBean实例，获取其创建的实际对象
+     * 
+     * <p>此方法是FactoryBean支持的核心实现，负责区分FactoryBean本身和FactoryBean创建的对象：</p>
+     * <ul>
+     *   <li>如果beanInstance是FactoryBean：调用其getObject()方法获取实际对象</li>
+     *   <li>如果beanInstance不是FactoryBean：直接返回原对象</li>
+     * </ul>
+     * 
+     * <p>FactoryBean对象缓存策略：</p>
+     * <ul>
+     *   <li>单例FactoryBean：getObject()结果会被缓存，避免重复创建</li>
+     *   <li>原型FactoryBean：每次调用getObject()创建新实例</li>
+     * </ul>
+     * 
+     * <p>使用示例：</p>
+     * <pre>
+     * // 获取FactoryBean创建的对象
+     * Car car = beanFactory.getBean("carFactory", Car.class);
+     * 
+     * // 获取FactoryBean本身（需要在Bean名称前加"&"）
+     * CarFactoryBean factoryBean = beanFactory.getBean("&carFactory", CarFactoryBean.class);
+     * </pre>
+     * 
+     * @param beanInstance Bean实例，可能是FactoryBean或普通Bean
+     * @param beanName Bean名称，用于缓存键和异常信息
+     * @return 实际要返回的对象（FactoryBean创建的对象或原Bean实例）
+     * @throws BeanException 如果FactoryBean.getObject()方法执行失败
+     */
+    protected Object getObjectForBeanInstance(Object beanInstance, String beanName){
+        Object object = beanInstance;
+        
+        // 检查是否为FactoryBean实例
+        if (beanInstance instanceof FactoryBean){
+            FactoryBean factoryBean = (FactoryBean) beanInstance;
+            try {
+                // 根据FactoryBean的作用域决定是否缓存getObject()的结果
+                if (factoryBean.isSingleton()){
+                    // 单例FactoryBean：先检查缓存，如果不存在则创建并缓存
+                    object = this.factoryBeanObjectCache.get(beanName);
+                    if (object == null){
+                        object = factoryBean.getObject();
+                        this.factoryBeanObjectCache.put(beanName, object);
+                    }
+                } else {
+                    // 原型FactoryBean：每次调用getObject()创建新实例
+                    object = factoryBean.getObject();
+                }
+            } catch (Exception ex){
+                // 包装FactoryBean异常，提供详细的错误信息
+                throw new BeanException("FactoryBean threw exception on object[" + beanName + "] creation", ex);
+            }
+        }
+        // 如果不是FactoryBean，直接返回原实例
+        return object;
     }
 
     @Override
