@@ -32,7 +32,7 @@ import org.winterframework.beans.factory.BeanFactory;
  * 
  * @see BeanFactory
  * @see BeanPostProcessor
- * @see org.winterframework.beans.ConfigurableListableBeanFactory
+ * @see org.winterframework.beans.factory.ConfigurableListableBeanFactory
  */
 public interface AutowireCapableBeanFactory extends BeanFactory {
 

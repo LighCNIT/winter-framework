@@ -41,8 +41,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     public static final String VALUE_ATTRIBUTE = "value";
     public static final String REF_ATTRIBUTE = "ref";
 
+    /** Bean生命周期相关属性 */
     public static final String INIT_METHOD_ATTRIBUTE = "init-method";
     public static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
+    
+    /** Bean作用域属性 */
+    public static final String SCOPE_ATTRIBUTE = "scope";
 
 
     /**
@@ -112,9 +116,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
             String beanId = bean.attributeValue(ID_ATTRIBUTE);
             String beanName = bean.attributeValue(NAME_ATTRIBUTE);
             String className = bean.attributeValue(CLASS_ATTRIBUTE);
+            // 解析Bean生命周期相关属性
             String initMethodName = bean.attributeValue(INIT_METHOD_ATTRIBUTE);
             String destroyMethodName = bean.attributeValue(DESTROY_METHOD_ATTRIBUTE);
-
+            
+            // 解析Bean作用域属性
+            // 支持的作用域：singleton（默认）、prototype
+            String beanScope = bean.attributeValue(SCOPE_ATTRIBUTE);
             Class<?> clazz;
             try {
                 clazz = Class.forName(className);
@@ -128,10 +136,17 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
                 beanName = StrUtil.lowerFirst(clazz.getSimpleName());
             }
 
+            // 创建BeanDefinition并设置基本属性
             BeanDefinition beanDefinition = new BeanDefinition(clazz);
             beanDefinition.setInitMethodName(initMethodName);
             beanDefinition.setDestroyMethodName(destroyMethodName);
-
+            
+            // 设置Bean作用域
+            // 如果未指定scope属性，则使用默认的单例作用域
+            if (StrUtil.isNotEmpty(beanScope)){
+                beanDefinition.setScope(beanScope);
+            }
+            // 注意：BeanDefinition构造时默认scope为singleton，无需额外设置
             List<Element> propertyList = bean.elements(PROPERTY_ELEMENT);
 
             for (Element property : propertyList) {

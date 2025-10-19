@@ -80,11 +80,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             // 实例化失败，抛出Bean异常
             throw new BeanException("Instantiation of bean failed", e);
         }
-        //注册有销毁方法的bean
+        //注册有销毁方法的bean（仅单例Bean支持销毁方法）
         registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
-        // 将创建好的Bean添加到单例缓存池中
-        // 这样下次获取时可以直接从缓存中返回，实现单例模式
-        addSingleton(beanName, bean);
+        
+        // 根据Bean作用域决定是否注册到单例缓存池
+        // 单例Bean：注册到缓存，后续获取时直接从缓存返回
+        // 原型Bean：不注册到缓存，每次获取都创建新实例
+        if (beanDefinition.isSingleton()){
+            addSingleton(beanName, bean);
+        }
+        // 原型Bean不需要注册到缓存，容器不管理其生命周期
         
         return bean;
     }
@@ -107,9 +112,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @param beanDefinition Bean定义信息
      */
     protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
-        if (bean instanceof DisposableBean || StrUtil.isNotEmpty(beanDefinition.getDestroyMethodName())) {
-            super.registerDisposableBean(beanName, new DisposableBeanAdapter(bean, beanName, beanDefinition));
+        // 只有单例类型的bean才会执行销毁方法
+        // 原型Bean不注册销毁方法，因为容器不管理其生命周期
+        if (beanDefinition.isSingleton()){
+            if (bean instanceof DisposableBean || StrUtil.isNotEmpty(beanDefinition.getDestroyMethodName())) {
+                super.registerDisposableBean(beanName, new DisposableBeanAdapter(bean, beanName, beanDefinition));
+            }
         }
+        // 原型Bean不支持销毁方法，因为：
+        // 1. 每次获取都创建新实例，无法跟踪所有实例
+        // 2. 容器不管理原型Bean的生命周期
+        // 3. 原型Bean的销毁由用户自行管理
     }
 
 

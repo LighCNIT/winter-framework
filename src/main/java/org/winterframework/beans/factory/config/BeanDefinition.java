@@ -16,6 +16,18 @@ import org.winterframework.beans.factory.PropertyValues;
 public class BeanDefinition {
 
     /**
+     * 单例作用域常量
+     * 表示Bean在容器中只有一个实例，每次获取都返回同一个对象
+     */
+    public static String SCOPE_SINGLETON = "singleton";
+
+    /**
+     * 原型作用域常量
+     * 表示Bean每次获取都创建新的实例，容器不管理原型Bean的生命周期
+     */
+    public static String SCOPE_PROTOTYPE = "prototype";
+
+    /**
      * Bean的Class类型
      * 保存Bean的类信息，用于反射创建实例
      */
@@ -43,6 +55,27 @@ public class BeanDefinition {
     private String destroyMethodName;
 
     /**
+     * Bean的作用域
+     * 默认为单例作用域（singleton），可以通过setScope()方法修改
+     * 支持的作用域：singleton、prototype
+     */
+    private String scope = SCOPE_SINGLETON;
+
+    /**
+     * 是否为单例Bean
+     * 当scope为"singleton"时为true，用于快速判断Bean的作用域类型
+     * 与singleton标志位保持一致，避免重复计算
+     */
+    private boolean singleton = true;
+
+    /**
+     * 是否为原型Bean
+     * 当scope为"prototype"时为true，用于快速判断Bean的作用域类型
+     * 与prototype标志位保持一致，避免重复计算
+     */
+    private boolean prototype = false;
+
+    /**
      * 构造方法 - 只指定Bean类型
      * 
      * @param beanClass Bean的Class类型，不能为null
@@ -65,6 +98,59 @@ public class BeanDefinition {
         }
         this.beanClass = beanClass;
         this.propertyValues = propertyValues != null ? propertyValues : new PropertyValues();
+    }
+
+    /**
+     * 设置Bean的作用域
+     * 
+     * <p>设置作用域的同时会更新singleton和prototype标志位，确保数据一致性。</p>
+     * 
+     * <p>支持的作用域：</p>
+     * <ul>
+     *   <li>singleton：单例作用域（默认）</li>
+     *   <li>prototype：原型作用域</li>
+     * </ul>
+     * 
+     * @param scope 作用域名称，支持"singleton"和"prototype"
+     */
+    public void setScope(String scope) {
+        this.scope = scope;
+        this.singleton = SCOPE_SINGLETON.equals(scope);
+        this.prototype = SCOPE_PROTOTYPE.equals(scope);
+    }
+
+    /**
+     * 判断是否为单例Bean
+     * 
+     * <p>单例Bean的特点：</p>
+     * <ul>
+     *   <li>容器中只有一个实例</li>
+     *   <li>每次获取都返回同一个对象</li>
+     *   <li>创建后注册到单例缓存池</li>
+     *   <li>容器关闭时执行销毁方法</li>
+     * </ul>
+     * 
+     * @return true表示是单例Bean，false表示不是
+     */
+    public boolean isSingleton() {
+        return this.singleton;
+    }
+
+    /**
+     * 判断是否为原型Bean
+     * 
+     * <p>原型Bean的特点：</p>
+     * <ul>
+     *   <li>每次获取都创建新的实例</li>
+     *   <li>容器不管理原型Bean的生命周期</li>
+     *   <li>不注册到单例缓存池</li>
+     *   <li>不执行销毁方法</li>
+     * </ul>
+     * 
+     * @return true表示是原型Bean，false表示不是
+     */
+    public boolean isPrototype() {
+        return this.prototype;
     }
 
     /**
