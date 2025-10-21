@@ -1,4 +1,4 @@
-package org.winterframework.test.bean;
+package org.winterframework.test.ioc.bean;
 
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.DisposableBean;

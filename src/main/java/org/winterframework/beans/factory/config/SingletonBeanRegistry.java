@@ -19,4 +19,7 @@ public interface SingletonBeanRegistry {
      * @return 单例Bean实例，如果不存在则返回null
      */
     Object getSingleton(String beanName);
+
+    void addSingleton(String beanName,Object singletonObject);
+
 }

@@ -1,9 +1,9 @@
-package org.winterframework.test;
+package org.winterframework.test.ioc;
 
 import org.junit.Test;
 import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.support.DefaultListableBeanFactory;
-import org.winterframework.test.service.HelloService;
+import org.winterframework.test.ioc.service.HelloService;
 
 /**
  * @author Ligh
@@ -11,14 +11,15 @@ import org.winterframework.test.service.HelloService;
  * @date 2025/10/12
  * @description TODO
  */
-public class BeanDefinitionAndBeanDefinitionRegistryTest {
+public class BeanDefinitionTest {
 
     @Test
-    public void testBeanFactory() throws Exception {
-        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+    public void testBeanFactory(){
+        DefaultListableBeanFactory  beanFactory = new DefaultListableBeanFactory();
         BeanDefinition beanDefinition = new BeanDefinition(HelloService.class);
-        beanFactory.registerBeanDefinition("helloService", beanDefinition);
-
+        // 注册bean
+        beanFactory.registerBeanDefinition("helloService",beanDefinition);
+        // 获取bean
         HelloService helloService = (HelloService) beanFactory.getBean("helloService");
         helloService.sayHello();
     }

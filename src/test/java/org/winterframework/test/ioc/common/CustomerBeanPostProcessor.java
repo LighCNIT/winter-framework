@@ -1,8 +1,8 @@
-package org.winterframework.test.common;
+package org.winterframework.test.ioc.common;
 
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.config.BeanPostProcessor;
-import org.winterframework.test.bean.Car;
+import org.winterframework.test.ioc.bean.Car;
 
 /**
  * 自定义BeanPostProcessor实现类

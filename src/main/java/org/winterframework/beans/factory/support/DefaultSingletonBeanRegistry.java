@@ -50,13 +50,12 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
     }
 
     /**
-     * 添加单例Bean到缓存池
-     * 使用protected修饰，只允许子类调用
-     * 
+     * 添加单例Bean到缓存池*
      * @param beanName Bean名称
      * @param singletonObject 单例Bean实例
      */
-    protected void addSingleton(String beanName, Object singletonObject) {
+    @Override
+    public void addSingleton(String beanName, Object singletonObject) {
         singletonObjects.put(beanName, singletonObject);
     }
 

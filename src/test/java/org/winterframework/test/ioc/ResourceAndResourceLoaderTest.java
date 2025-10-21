@@ -1,4 +1,4 @@
-package org.winterframework.test;
+package org.winterframework.test.ioc;
 
 import cn.hutool.core.io.IoUtil;
 import org.junit.Test;

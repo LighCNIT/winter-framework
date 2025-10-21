@@ -1,8 +1,8 @@
-package org.winterframework.test.common;
+package org.winterframework.test.ioc.common;
 
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.FactoryBean;
-import org.winterframework.test.bean.Car;
+import org.winterframework.test.ioc.bean.Car;
 
 /**
  * CarFactoryBean - FactoryBean实现示例
@@ -25,7 +25,7 @@ import org.winterframework.test.bean.Car;
  * - 验证FactoryBean的缓存机制
  * 
  * 配置示例：
- * <bean id="car" class="org.winterframework.test.common.CarFactoryBean">
+ * <bean id="car" class="org.winterframework.test.ioc.common.CarFactoryBean">
  *     <property name="brand" value="porsche"/>
  * </bean>
  */

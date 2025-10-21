@@ -1,8 +1,8 @@
-package org.winterframework.test;
+package org.winterframework.test.ioc;
 
 import org.junit.Test;
 import org.winterframework.context.support.ClassPathXmlApplicationContext;
-import org.winterframework.test.bean.Car;
+import org.winterframework.test.ioc.bean.Car;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 

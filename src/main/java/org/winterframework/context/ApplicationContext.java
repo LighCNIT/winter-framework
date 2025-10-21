@@ -35,5 +35,5 @@ import org.winterframework.core.io.ResourceLoader;
  * @see ResourceLoader
  * @see ConfigurableApplicationContext
  */
-public interface ApplicationContext extends ListableBeanFactory, HierarchicalBeanFactory, ResourceLoader {
+public interface ApplicationContext extends ListableBeanFactory, HierarchicalBeanFactory, ResourceLoader,ApplicationEventPublisher {
 }

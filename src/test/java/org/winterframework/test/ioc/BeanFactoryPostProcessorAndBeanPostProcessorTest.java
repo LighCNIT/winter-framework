@@ -1,12 +1,12 @@
-package org.winterframework.test;
+package org.winterframework.test.ioc;
 
 import org.junit.Test;
 import org.winterframework.beans.factory.support.DefaultListableBeanFactory;
 import org.winterframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.winterframework.test.bean.Car;
-import org.winterframework.test.bean.Person;
-import org.winterframework.test.common.CustomBeanFactoryPostProcessor;
-import org.winterframework.test.common.CustomerBeanPostProcessor;
+import org.winterframework.test.ioc.bean.Car;
+import org.winterframework.test.ioc.bean.Person;
+import org.winterframework.test.ioc.common.CustomBeanFactoryPostProcessor;
+import org.winterframework.test.ioc.common.CustomerBeanPostProcessor;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 

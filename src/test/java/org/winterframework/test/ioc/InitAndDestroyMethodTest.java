@@ -1,4 +1,4 @@
-package org.winterframework.test;
+package org.winterframework.test.ioc;
 
 import org.junit.Test;
 import org.winterframework.context.support.ClassPathXmlApplicationContext;

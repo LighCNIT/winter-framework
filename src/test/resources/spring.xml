@@ -7,18 +7,18 @@
 		 http://www.springframework.org/schema/context
 		 http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
-    <bean id="person" class="org.winterframework.test.bean.Person">
+    <bean id="person" class="org.winterframework.test.ioc.bean.Person">
         <property name="name" value="derek"/>
         <property name="car" ref="car"/>
     </bean>
 
-    <bean id="car" class="org.winterframework.test.bean.Car">
+    <bean id="car" class="org.winterframework.test.ioc.bean.Car">
         <property name="brand" value="porsche"/>
     </bean>
 
-    <bean class="org.winterframework.test.common.CustomBeanFactoryPostProcessor"/>
+    <bean class="org.winterframework.test.ioc.common.CustomBeanFactoryPostProcessor"/>
 
-    <bean class="org.winterframework.test.common.CustomerBeanPostProcessor"/>
+    <bean class="org.winterframework.test.ioc.common.CustomerBeanPostProcessor"/>
 
-    <bean id="helloService" class="org.winterframework.test.service.HelloService"/>
+    <bean id="helloService" class="org.winterframework.test.ioc.service.HelloService"/>
 </beans>
