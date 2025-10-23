@@ -1,4 +1,4 @@
-package org.winterframework.test.ioc.common.event;
+package org.winterframework.test.common.event;
 
 import org.winterframework.context.ApplicationListener;
 import org.winterframework.context.event.ContextClosedEvent;

@@ -2,7 +2,7 @@ package org.winterframework.test.ioc;
 
 import org.junit.Test;
 import org.winterframework.context.support.ClassPathXmlApplicationContext;
-import org.winterframework.test.ioc.service.HelloService;
+import org.winterframework.test.service.HelloService;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 

@@ -3,7 +3,7 @@ package org.winterframework.test.ioc;
 import org.junit.Test;
 import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.support.DefaultListableBeanFactory;
-import org.winterframework.test.ioc.service.HelloService;
+import org.winterframework.test.service.HelloService;
 
 /**
  * @author Ligh

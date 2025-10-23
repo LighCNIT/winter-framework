@@ -2,7 +2,7 @@ package org.winterframework.test.ioc;
 
 import org.junit.Test;
 import org.winterframework.context.support.ClassPathXmlApplicationContext;
-import org.winterframework.test.ioc.common.event.CustomEvent;
+import org.winterframework.test.common.event.CustomEvent;
 
 /**
  * 事件和事件监听器测试类

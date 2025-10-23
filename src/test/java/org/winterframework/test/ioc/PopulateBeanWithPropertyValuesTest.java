@@ -6,8 +6,8 @@ import org.winterframework.beans.factory.PropertyValues;
 import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.config.BeanReference;
 import org.winterframework.beans.factory.support.DefaultListableBeanFactory;
-import org.winterframework.test.ioc.bean.Car;
-import org.winterframework.test.ioc.bean.Person;
+import org.winterframework.test.bean.Car;
+import org.winterframework.test.bean.Person;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**

@@ -1,4 +1,4 @@
-package org.winterframework.test.ioc.bean;
+package org.winterframework.test.bean;
 
 /**
  * Car测试Bean类

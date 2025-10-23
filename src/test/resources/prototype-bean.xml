@@ -9,7 +9,7 @@
 
     <!-- 原型Bean测试配置 -->
     <!-- 设置scope="prototype"表示每次获取都创建新实例 -->
-    <bean id="car" class="org.winterframework.test.ioc.bean.Car" scope="prototype">
+    <bean id="car" class="org.winterframework.test.bean.Car" scope="prototype">
         <property name="brand" value="porsche"/>
     </bean>
 

@@ -1,4 +1,4 @@
-package org.winterframework.test.ioc.service;
+package org.winterframework.test.service;
 
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.BeanFactory;

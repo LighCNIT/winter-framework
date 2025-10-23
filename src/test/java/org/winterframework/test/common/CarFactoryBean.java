@@ -1,8 +1,8 @@
-package org.winterframework.test.ioc.common;
+package org.winterframework.test.common;
 
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.FactoryBean;
-import org.winterframework.test.ioc.bean.Car;
+import org.winterframework.test.bean.Car;
 
 /**
  * CarFactoryBean - FactoryBean实现示例

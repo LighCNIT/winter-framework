@@ -1,4 +1,4 @@
-package org.winterframework.test.ioc.common;
+package org.winterframework.test.common;
 
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.ConfigurableListableBeanFactory;
