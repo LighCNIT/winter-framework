@@ -1,12 +1,11 @@
 package org.winterframework.test.aop;
 
+import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.Before;
 import org.junit.Test;
-import org.winterframework.aop.AdvisedSupport;
-import org.winterframework.aop.GenericInterceptor;
-import org.winterframework.aop.MethodMatcher;
-import org.winterframework.aop.TargetSource;
+import org.winterframework.aop.*;
 import org.winterframework.aop.aspectj.AspectJExpressionPointcut;
+import org.winterframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import org.winterframework.aop.framework.CglibAopProxy;
 import org.winterframework.aop.framework.JdkDynamicAopProxy;
 import org.winterframework.aop.framework.ProxyFactory;
@@ -116,5 +115,32 @@ public class DynamicProxyTest {
 
         WorldService proxy = (WorldService) new ProxyFactory(advisedSupport).getProxy();
         proxy.explode();
+    }
+
+    @Test
+    public void testAdvisor() throws Exception {
+        WorldService worldService = new WorldServiceImpl();
+
+        //Advisor是Pointcut和Advice的组合
+        String expression = "execution(* org.winterframework.test.service.WorldService.explode(..))";
+        AspectJExpressionPointcutAdvisor advisor = new AspectJExpressionPointcutAdvisor();
+        advisor.setExpression(expression);
+        GenericInterceptor methodInterceptor = new GenericInterceptor();
+        methodInterceptor.setBeforeAdvice( new WorldServiceBeforeAdvice());
+        advisor.setAdvice(methodInterceptor);
+
+        ClassFilter classFilter = advisor.getPointcut().getClassFilter();
+        if (classFilter.matches(worldService.getClass())) {
+            AdvisedSupport advisedSupport = new AdvisedSupport();
+
+            TargetSource targetSource = new TargetSource(worldService);
+            advisedSupport.setTargetSource(targetSource);
+            advisedSupport.setMethodInterceptor((MethodInterceptor) advisor.getAdvice());
+            advisedSupport.setMethodMatcher(advisor.getPointcut().getMethodMatcher());
+//			advisedSupport.setProxyTargetClass(true);   //JDK or CGLIB
+
+            WorldService proxy = (WorldService) new ProxyFactory(advisedSupport).getProxy();
+            proxy.explode();
+        }
     }
 }
