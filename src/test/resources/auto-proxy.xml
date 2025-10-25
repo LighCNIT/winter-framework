@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	         http://www.springframework.org/schema/beans/spring-beans.xsd
+		 http://www.springframework.org/schema/context
+		 http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <bean id="worldService" class="org.winterframework.test.service.WorldServiceImpl"/>
+    
+    <bean id="worldServiceWithException" class="org.winterframework.test.service.WorldServiceWithExceptionImpl"/>
+
+    <bean class="org.winterframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+
+    <bean id="pointcutAdvisor" class="org.winterframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
+        <property name="expression" value="execution(* org.winterframework.test.service.WorldService.explode(..))"/>
+        <property name="advice" ref="methodInterceptor"/>
+    </bean>
+
+    <bean id="methodInterceptor" class="org.winterframework.aop.CombineAdviceInterceptor">
+        <property name="beforeAdviceInterceptor" ref="beforeAdviceInterceptor"/>
+        <property name="afterAdviceInterceptor" ref="afterAdviceInterceptor"/>
+        <property name="afterReturningAdviceInterceptor" ref="afterReturningAdviceInterceptor"/>
+        <property name="throwsAdviceInterceptor" ref="throwsAdviceInterceptor"/>
+        <property name="aroundAdviceInterceptor" ref="aroundAdviceInterceptor"/>
+    </bean>
+
+    <bean id="beforeAdviceInterceptor" class="org.winterframework.aop.framework.adapter.MethodBeforeAdviceInterceptor">
+        <property name="advice" ref="beforeAdvice"/>
+    </bean>
+
+    <bean id="afterAdviceInterceptor" class="org.winterframework.aop.framework.adapter.MethodAfterAdviceInterceptor">
+        <property name="advice" ref="afterAdvice"/>
+    </bean>
+
+    <bean id="afterReturningAdviceInterceptor" class="org.winterframework.aop.framework.adapter.MethodAfterReturningAdviceInterceptor">
+        <property name="advice" ref="afterReturningAdvice"/>
+    </bean>
+
+    <bean id="throwsAdviceInterceptor" class="org.winterframework.aop.framework.adapter.MethodThrowsAdviceInterceptor">
+        <property name="advice" ref="throwsAdvice"/>
+    </bean>
+
+    <bean id="aroundAdviceInterceptor" class="org.winterframework.aop.framework.adapter.MethodAroundAdviceInterceptor">
+        <property name="advice" ref="aroundAdvice"/>
+    </bean>
+
+    <bean id="beforeAdvice" class="org.winterframework.test.common.WorldServiceBeforeAdvice"/>
+    
+    <bean id="afterAdvice" class="org.winterframework.test.common.WorldServiceAfterAdvice"/>
+    
+    <bean id="afterReturningAdvice" class="org.winterframework.test.common.WorldServiceAfterReturningAdvice"/>
+    
+    <bean id="throwsAdvice" class="org.winterframework.test.common.WorldServiceThrowsAdvice"/>
+    
+    <bean id="aroundAdvice" class="org.winterframework.test.common.WorldServiceAroundAdvice"/>
+
+</beans>

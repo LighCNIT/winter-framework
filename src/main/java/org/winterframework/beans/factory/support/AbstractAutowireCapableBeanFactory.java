@@ -1,6 +1,7 @@
 package org.winterframework.beans.factory.support;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.OptionalBean;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import org.winterframework.beans.BeanException;
@@ -11,6 +12,7 @@ import org.winterframework.beans.factory.PropertyValue;
 import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.config.BeanPostProcessor;
 import org.winterframework.beans.factory.config.BeanReference;
+import org.winterframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 
 import java.lang.reflect.Method;
 
@@ -48,8 +50,30 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      */
     @Override
     protected Object createBean(String beanName, BeanDefinition beanDefinition) throws BeanException {
-        // 调用实际的Bean创建方法
-        return doCreateBean(beanName, beanDefinition);
+        Object bean = resolveBeforeInstantiation(beanName, beanDefinition);
+        // 如果bean需要代理则直接返回代理对象,否则走创建bean流程
+        return bean != null ? bean : doCreateBean(beanName, beanDefinition);
+    }
+
+    protected Object resolveBeforeInstantiation(String beanName,BeanDefinition beanDefinition){
+        Object bean = applyBeanPostProcessorsBeforeInstantiation(beanDefinition.getBeanClass(),beanName);
+        if (bean != null){
+            bean = applyBeanPostProcessorsAfterInitialization(bean,beanName);
+        }
+        return bean;
+    }
+
+    protected Object applyBeanPostProcessorsBeforeInstantiation(Class beanClass, String beanName) {
+        for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()) {
+            if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+                Object result = ((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessBeforeInstantiation(beanClass, beanName);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

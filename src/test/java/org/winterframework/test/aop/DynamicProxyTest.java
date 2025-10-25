@@ -9,6 +9,7 @@ import org.winterframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import org.winterframework.aop.framework.CglibAopProxy;
 import org.winterframework.aop.framework.JdkDynamicAopProxy;
 import org.winterframework.aop.framework.ProxyFactory;
+import org.winterframework.aop.framework.adapter.MethodBeforeAdviceInterceptor;
 import org.winterframework.test.common.WorldServiceBeforeAdvice;
 import org.winterframework.test.common.WorldServiceInterceptor;
 import org.winterframework.test.service.WorldService;
@@ -109,8 +110,7 @@ public class DynamicProxyTest {
     public void testBeforeAdvice() throws Exception {
         //设置BeforeAdvice
         WorldServiceBeforeAdvice beforeAdvice = new WorldServiceBeforeAdvice();
-        GenericInterceptor methodInterceptor = new GenericInterceptor();
-        methodInterceptor.setBeforeAdvice(beforeAdvice);
+        MethodBeforeAdviceInterceptor methodInterceptor = new MethodBeforeAdviceInterceptor(new WorldServiceBeforeAdvice());
         advisedSupport.setMethodInterceptor(methodInterceptor);
 
         WorldService proxy = (WorldService) new ProxyFactory(advisedSupport).getProxy();
@@ -125,8 +125,7 @@ public class DynamicProxyTest {
         String expression = "execution(* org.winterframework.test.service.WorldService.explode(..))";
         AspectJExpressionPointcutAdvisor advisor = new AspectJExpressionPointcutAdvisor();
         advisor.setExpression(expression);
-        GenericInterceptor methodInterceptor = new GenericInterceptor();
-        methodInterceptor.setBeforeAdvice( new WorldServiceBeforeAdvice());
+        MethodBeforeAdviceInterceptor methodInterceptor = new MethodBeforeAdviceInterceptor(new WorldServiceBeforeAdvice());
         advisor.setAdvice(methodInterceptor);
 
         ClassFilter classFilter = advisor.getPointcut().getClassFilter();
