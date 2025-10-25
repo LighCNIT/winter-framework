@@ -8,6 +8,7 @@ import org.winterframework.aop.TargetSource;
 import org.winterframework.aop.aspectj.AspectJExpressionPointcut;
 import org.winterframework.aop.framework.CglibAopProxy;
 import org.winterframework.aop.framework.JdkDynamicAopProxy;
+import org.winterframework.aop.framework.ProxyFactory;
 import org.winterframework.test.common.WorldServiceInterceptor;
 import org.winterframework.test.service.WorldService;
 import org.winterframework.test.service.WorldServiceImpl;
@@ -89,6 +90,17 @@ public class DynamicProxyTest {
     @Test
     public void testCglibDynamicProxy() throws Exception {
         WorldService proxy = (WorldService) new CglibAopProxy(advisedSupport).getProxy();
+        proxy.explode();
+    }
+
+    @Test
+    public void testProxyFactory(){
+        advisedSupport.setProxyTargetClass(false);
+        WorldService proxy = (WorldService) new ProxyFactory(advisedSupport).getProxy();
+        proxy.explode();
+
+        advisedSupport.setProxyTargetClass(true);
+        proxy = (WorldService) new ProxyFactory(advisedSupport).getProxy();
         proxy.explode();
     }
 }
