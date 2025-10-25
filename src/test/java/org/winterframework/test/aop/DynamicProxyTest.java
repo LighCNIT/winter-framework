@@ -3,12 +3,14 @@ package org.winterframework.test.aop;
 import org.junit.Before;
 import org.junit.Test;
 import org.winterframework.aop.AdvisedSupport;
+import org.winterframework.aop.GenericInterceptor;
 import org.winterframework.aop.MethodMatcher;
 import org.winterframework.aop.TargetSource;
 import org.winterframework.aop.aspectj.AspectJExpressionPointcut;
 import org.winterframework.aop.framework.CglibAopProxy;
 import org.winterframework.aop.framework.JdkDynamicAopProxy;
 import org.winterframework.aop.framework.ProxyFactory;
+import org.winterframework.test.common.WorldServiceBeforeAdvice;
 import org.winterframework.test.common.WorldServiceInterceptor;
 import org.winterframework.test.service.WorldService;
 import org.winterframework.test.service.WorldServiceImpl;
@@ -101,6 +103,18 @@ public class DynamicProxyTest {
 
         advisedSupport.setProxyTargetClass(true);
         proxy = (WorldService) new ProxyFactory(advisedSupport).getProxy();
+        proxy.explode();
+    }
+
+    @Test
+    public void testBeforeAdvice() throws Exception {
+        //设置BeforeAdvice
+        WorldServiceBeforeAdvice beforeAdvice = new WorldServiceBeforeAdvice();
+        GenericInterceptor methodInterceptor = new GenericInterceptor();
+        methodInterceptor.setBeforeAdvice(beforeAdvice);
+        advisedSupport.setMethodInterceptor(methodInterceptor);
+
+        WorldService proxy = (WorldService) new ProxyFactory(advisedSupport).getProxy();
         proxy.explode();
     }
 }
