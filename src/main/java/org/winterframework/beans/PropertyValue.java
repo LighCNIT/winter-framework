@@ -1,4 +1,4 @@
-package org.winterframework.beans.factory;
+package org.winterframework.beans;
 
 /**
  * Bean属性值 - 表示Bean的一个属性及其值

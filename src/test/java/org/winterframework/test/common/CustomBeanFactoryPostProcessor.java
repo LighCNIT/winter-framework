@@ -2,8 +2,8 @@ package org.winterframework.test.common;
 
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.ConfigurableListableBeanFactory;
-import org.winterframework.beans.factory.PropertyValue;
-import org.winterframework.beans.factory.PropertyValues;
+import org.winterframework.beans.PropertyValue;
+import org.winterframework.beans.PropertyValues;
 import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.config.BeanFactoryPostProcessor;
 

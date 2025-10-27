@@ -1,4 +1,4 @@
-package org.winterframework.beans.factory;
+package org.winterframework.beans;
 
 import java.util.ArrayList;
 import java.util.List;

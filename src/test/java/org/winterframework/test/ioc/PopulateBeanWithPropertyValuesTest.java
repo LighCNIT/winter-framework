@@ -1,8 +1,8 @@
 package org.winterframework.test.ioc;
 
 import org.junit.Test;
-import org.winterframework.beans.factory.PropertyValue;
-import org.winterframework.beans.factory.PropertyValues;
+import org.winterframework.beans.PropertyValue;
+import org.winterframework.beans.PropertyValues;
 import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.config.BeanReference;
 import org.winterframework.beans.factory.support.DefaultListableBeanFactory;

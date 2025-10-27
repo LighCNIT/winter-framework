@@ -1,7 +1,7 @@
 package org.winterframework.beans.factory.config;
 
-import org.winterframework.beans.factory.PropertyValue;
-import org.winterframework.beans.factory.PropertyValues;
+import org.winterframework.beans.PropertyValue;
+import org.winterframework.beans.PropertyValues;
 
 /**
  * Bean定义类 - Bean的元数据信息

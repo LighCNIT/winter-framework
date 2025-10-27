@@ -6,7 +6,7 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.winterframework.beans.BeanException;
-import org.winterframework.beans.factory.PropertyValue;
+import org.winterframework.beans.PropertyValue;
 import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.config.BeanReference;
 import org.winterframework.beans.factory.support.AbstractBeanDefinitionReader;
