@@ -1,7 +1,7 @@
 package org.winterframework.beans.factory.config;
 
-import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.HierarchicalBeanFactory;
+import org.winterframework.util.StringValueResolver;
 
 /**
  * 可配置的Bean工厂接口
@@ -69,4 +69,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
      * 销毁单例bean
      */
     void destroySingletons();
+
+    void addEmbeddedValueResolver(StringValueResolver valueResolver);
+
+    String resolveEmbeddedValue(String value);
 }

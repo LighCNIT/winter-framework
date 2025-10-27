@@ -1,5 +1,8 @@
 package org.winterframework.test.bean;
 
+import org.winterframework.beans.factory.annotation.Value;
+import org.winterframework.stereotype.Component;
+
 /**
  * Car测试Bean类
  * 
@@ -23,12 +26,14 @@ package org.winterframework.test.bean;
  * - 必须提供无参构造器（框架要求）
  * - 必须提供getter/setter方法（属性注入需要）
  */
+@Component
 public class Car {
 
     /**
      * 汽车品牌
      * 用于测试String类型属性的注入
      */
+    @Value("${brand}")
     private String brand;
 
     /**

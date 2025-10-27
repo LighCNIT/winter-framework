@@ -6,6 +6,7 @@ import org.winterframework.beans.factory.FactoryBean;
 import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.config.BeanPostProcessor;
 import org.winterframework.beans.factory.config.ConfigurableBeanFactory;
+import org.winterframework.util.StringValueResolver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,6 +76,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      * </ul>
      */
     private final Map<String,Object> factoryBeanObjectCache = new HashMap<>();
+
+    private final List<StringValueResolver> embeddedValueResolvers = new ArrayList<StringValueResolver>();
 
 
     /**
@@ -242,5 +245,17 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
      */
     public List<BeanPostProcessor> getBeanPostProcessors() {
         return this.beanPostProcessors;
+    }
+
+    public void addEmbeddedValueResolver(StringValueResolver valueResolver) {
+        this.embeddedValueResolvers.add(valueResolver);
+    }
+
+    public String resolveEmbeddedValue(String value) {
+        String result = value;
+        for (StringValueResolver resolver : this.embeddedValueResolvers) {
+            result = resolver.resolveStringValue(result);
+        }
+        return result;
     }
 }

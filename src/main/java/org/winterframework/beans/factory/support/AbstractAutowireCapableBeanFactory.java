@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import org.winterframework.beans.BeanException;
+import org.winterframework.beans.PropertyValues;
 import org.winterframework.beans.factory.BeanFactoryAware;
 import org.winterframework.beans.factory.DisposableBean;
 import org.winterframework.beans.factory.InitializingBean;
@@ -95,6 +96,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             // 通过反射创建Bean实例
             // 使用无参构造方法创建对象（要求Bean必须有无参构造器）
             bean = createBeanInstance(beanDefinition);
+            //实例化bean之后执行
+            boolean continueWithPropertyPopulation = applyBeanPostProcessorsAfterInstantiation(beanName, bean);
+            if (!continueWithPropertyPopulation) {
+                return bean;
+            }
+            //在设置bean属性之前，允许BeanPostProcessor修改属性值
+            applyBeanPostProcessorsBeforeApplyingPropertyValues(beanName, bean, beanDefinition);
+
+
             // 为bean填充属性
             applyPropertyValues(beanName,bean,beanDefinition);
             //执行bean的初始化方法和BeanPostProcessor的前置和后置处理方法
@@ -294,6 +304,40 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         return getInstantiationStrategy().instantiate(beanDefinition);
     }
 
+
+    protected boolean applyBeanPostProcessorsAfterInstantiation(String beanName,Object bean){
+        boolean continueWithPropertyPopulation = true;
+        for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()){
+            if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor){
+                if (!((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessAfterInstantiation(bean,beanName)){
+                    continueWithPropertyPopulation = false;
+                    break;
+                }
+            }
+        }
+        return continueWithPropertyPopulation;
+    }
+
+    /**
+     * 在设置bean属性之前，允许BeanPostProcessor修改属性值
+     *
+     * @param beanName
+     * @param bean
+     * @param beanDefinition
+     */
+    protected void applyBeanPostProcessorsBeforeApplyingPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
+        for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()) {
+            if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+                PropertyValues pvs = ((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessPropertyValues(beanDefinition.getPropertyValues(), bean, beanName);
+                if (pvs != null) {
+                    for (PropertyValue propertyValue : pvs.getPropertyValues()) {
+                        beanDefinition.getPropertyValues().addPropertyValue(propertyValue);
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * 为Bean应用属性值 - 实现属性注入
      * 
@@ -376,8 +420,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             }
             initMethod.invoke(bean);
         }
-        
-        System.out.println("执行bean[" + beanName + "]的初始化方法");
     }
 
     /**
