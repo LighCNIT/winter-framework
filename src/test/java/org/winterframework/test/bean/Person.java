@@ -3,6 +3,8 @@ package org.winterframework.test.bean;
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.DisposableBean;
 import org.winterframework.beans.factory.InitializingBean;
+import org.winterframework.beans.factory.annotation.Autowired;
+import org.winterframework.stereotype.Component;
 
 /**
  * Person测试Bean类
@@ -27,6 +29,7 @@ import org.winterframework.beans.factory.InitializingBean;
  * - 必须提供无参构造器（框架要求）
  * - 必须提供getter/setter方法（属性注入需要）
  */
+@Component
 public class Person implements InitializingBean, DisposableBean {
 
     /**
@@ -46,6 +49,7 @@ public class Person implements InitializingBean, DisposableBean {
      * 用于测试Bean之间的依赖注入功能
      * 当Person需要依赖Car时，框架会自动注入Car实例
      */
+    @Autowired
     private Car car;
 
 

@@ -198,6 +198,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         return getBeanFactory().getBean(name, requiredType);
     }
 
+    public <T> T getBean(Class<T> requiredType) throws BeanException {
+        return getBeanFactory().getBean(requiredType);
+    }
+
     /**
      * 根据类型获取所有Bean
      * 

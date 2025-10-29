@@ -4,9 +4,7 @@ import org.winterframework.beans.BeanException;
 import org.winterframework.beans.factory.ConfigurableListableBeanFactory;
 import org.winterframework.beans.factory.config.BeanDefinition;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 默认可列表的Bean工厂 - 完整实现类
@@ -125,5 +123,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     @Override
     public void preInstantiateSingletons() throws BeanException {
         beanDefinitionMap.keySet().forEach(this::getBean);
+    }
+
+    @Override
+    public <T> T getBean(Class<T> requiredType) throws BeanException {
+        List<String> beanNames = new ArrayList<>();
+        for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()) {
+            Class beanClass = entry.getValue().getBeanClass();
+            if (requiredType.isAssignableFrom(beanClass)) {
+                beanNames.add(entry.getKey());
+            }
+        }
+        if (beanNames.size() == 1) {
+            return getBean(beanNames.get(0), requiredType);
+        }
+
+        throw new BeanException(requiredType + "expected single bean but found " +
+                beanNames.size() + ": " + beanNames);
     }
 }
