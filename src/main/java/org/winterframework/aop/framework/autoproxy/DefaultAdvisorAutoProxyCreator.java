@@ -114,6 +114,29 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
      */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeanException {
+        //避免死循环
+        if (isInfrastructureClass(bean.getClass())) {
+            return bean;
+        }
+
+        Collection<AspectJExpressionPointcutAdvisor> advisors = beanFactory.getBeansOfType(AspectJExpressionPointcutAdvisor.class).values();
+        try {
+            for (AspectJExpressionPointcutAdvisor advisor : advisors) {
+                ClassFilter classFilter = advisor.getPointcut().getClassFilter();
+                if (classFilter.matches(bean.getClass())) {
+                    AdvisedSupport advisedSupport = new AdvisedSupport();
+                    TargetSource targetSource = new TargetSource(bean);
+                    advisedSupport.setTargetSource(targetSource);
+                    advisedSupport.setMethodInterceptor((MethodInterceptor) advisor.getAdvice());
+                    advisedSupport.setMethodMatcher(advisor.getPointcut().getMethodMatcher());
+
+                    //返回代理对象
+                    return new ProxyFactory(advisedSupport).getProxy();
+                }
+            }
+        } catch (Exception ex) {
+            throw new BeanException("Error create proxy bean for: " + beanName, ex);
+        }
         return bean;
     }
 
@@ -139,43 +162,6 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
      */
     @Override
     public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeanException {
-        // 检查是否为基础设施类，如果是则跳过代理创建
-        if (isInfrastructureClass(beanClass)){
-            return null;
-        }
-        
-        // 获取缓存的Advisor，避免递归调用
-        Collection<AspectJExpressionPointcutAdvisor> advisors = getCachedAdvisors();
-        
-        try {
-            // 遍历所有顾问，检查是否匹配目标类
-            for (AspectJExpressionPointcutAdvisor advisor : advisors){
-                ClassFilter classFilter = advisor.getPointcut().getClassFilter();
-                if (classFilter.matches(beanClass)){
-                    // 创建AOP配置支持
-                    AdvisedSupport advisedSupport = new AdvisedSupport();
-                    
-                    // 获取Bean定义并实例化目标对象
-                    BeanDefinition targetBeanDefinition = beanFactory.getBeanDefinition(beanName);
-                    Object bean = beanFactory.getInstantiationStrategy().instantiate(targetBeanDefinition);
-                    
-                    // 设置目标对象源
-                    TargetSource targetSource = new TargetSource(bean);
-                    advisedSupport.setTargetSource(targetSource);
-                    
-                    // 设置方法拦截器和匹配器
-                    advisedSupport.setMethodInterceptor((MethodInterceptor) advisor.getAdvice());
-                    advisedSupport.setMethodMatcher(advisor.getPointcut().getMethodMatcher());
-
-                    // 创建并返回代理对象
-                    return new ProxyFactory(advisedSupport).getProxy();
-                }
-            }
-        }catch (Exception ex) {
-            throw new BeanException("Error create proxy bean for: " + beanName, ex);
-        }
-        
-        // 没有匹配的顾问，返回null让容器正常创建Bean
         return null;
     }
     
@@ -214,6 +200,6 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
 
     @Override
     public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeanException {
-        return false;
+        return true;
     }
 }

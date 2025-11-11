@@ -20,4 +20,6 @@ public interface WorldService {
      * 预期行为：打印"The Earth is going to explode"信息。
      */
     void explode();
+
+    String getName();
 }
