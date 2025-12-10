@@ -1,6 +1,7 @@
 package org.winterframework.beans.factory.config;
 
 import org.winterframework.beans.factory.HierarchicalBeanFactory;
+import org.winterframework.core.convert.ConversionService;
 import org.winterframework.util.StringValueResolver;
 
 /**
@@ -73,4 +74,14 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
     void addEmbeddedValueResolver(StringValueResolver valueResolver);
 
     String resolveEmbeddedValue(String value);
+
+    /**
+     * 设置全局类型转换服务，供属性注入和占位符解析阶段使用
+     */
+    void setConversionService(ConversionService conversionService);
+
+    /**
+     * 获取当前注册的类型转换服务
+     */
+    ConversionService getConversionService();
 }

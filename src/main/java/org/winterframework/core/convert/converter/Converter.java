@@ -1,9 +1,11 @@
 package org.winterframework.core.convert.converter;
 
 /**
- * 类型转换抽象接口
- * @param <S>
- * @param <T>
+ * 单向类型转换器
+ * @param <S> 源类型
+ * @param <T> 目标类型
+ *
+ * <p>由 {@link org.winterframework.core.convert.support.GenericConversionService} 适配并统一管理。</p>
  */
 public interface Converter<S,T> {
 

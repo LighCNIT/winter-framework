@@ -26,4 +26,6 @@ public interface BeanFactory {
     <T> T getBean(String name,Class<T> requiredType) throws BeanException;
 
     <T> T getBean(Class<T> requiredType) throws BeanException;
+
+    boolean containsBean(String name);
 }

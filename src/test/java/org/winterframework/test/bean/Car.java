@@ -3,6 +3,8 @@ package org.winterframework.test.bean;
 import org.winterframework.beans.factory.annotation.Value;
 import org.winterframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 /**
  * Car测试Bean类
  * 
@@ -28,6 +30,11 @@ import org.winterframework.stereotype.Component;
  */
 @Component
 public class Car {
+
+    private int price;
+
+    private LocalDate produceDate;
+
 
     /**
      * 汽车品牌
@@ -61,6 +68,23 @@ public class Car {
      */
     public void setBrand(String brand) {
         this.brand = brand;
+    }
+
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public LocalDate getProduceDate() {
+        return produceDate;
+    }
+
+    public void setProduceDate(LocalDate produceDate) {
+        this.produceDate = produceDate;
     }
 
     /**

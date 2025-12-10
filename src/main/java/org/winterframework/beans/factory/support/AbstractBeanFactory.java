@@ -6,6 +6,7 @@ import org.winterframework.beans.factory.FactoryBean;
 import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.config.BeanPostProcessor;
 import org.winterframework.beans.factory.config.ConfigurableBeanFactory;
+import org.winterframework.core.convert.ConversionService;
 import org.winterframework.util.StringValueResolver;
 
 import java.util.ArrayList;
@@ -78,6 +79,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     private final Map<String,Object> factoryBeanObjectCache = new HashMap<>();
 
     private final List<StringValueResolver> embeddedValueResolvers = new ArrayList<StringValueResolver>();
+
+    private ConversionService conversionService;
 
 
     /**
@@ -174,6 +177,13 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         return ((T) getBean(name));
     }
 
+    @Override
+    public boolean containsBean(String name) {
+        return containsBeanDefinition(name);
+    }
+
+    protected abstract boolean containsBeanDefinition(String beanName);
+
     /**
      * 创建Bean实例 - 抽象方法，由子类实现
      * 
@@ -257,5 +267,21 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
             result = resolver.resolveStringValue(result);
         }
         return result;
+    }
+
+    /**
+     * 注入全局的类型转换服务，供属性填充 / @Value 等场景调用
+     */
+    @Override
+    public void setConversionService(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
+
+    /**
+     * 获取当前配置的类型转换服务
+     */
+    @Override
+    public ConversionService getConversionService() {
+        return conversionService;
     }
 }

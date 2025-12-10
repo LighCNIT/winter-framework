@@ -3,6 +3,9 @@ package org.winterframework.core.convert.converter;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * 更通用的类型转换器接口，可声明一组可转换的源/目标类型对
+ */
 public interface GenericConverter {
 
     Set<ConvertiblePair> getConvertibleTypes();

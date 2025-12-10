@@ -11,6 +11,7 @@ import org.winterframework.context.event.ApplicationEventMulticaster;
 import org.winterframework.context.event.ContextClosedEvent;
 import org.winterframework.context.event.ContextRefreshedEvent;
 import org.winterframework.context.event.SimpleApplicationEventMulticaster;
+import org.winterframework.core.convert.ConversionService;
 import org.winterframework.core.io.DefaultResourceLoader;
 
 import java.util.Collection;
@@ -52,6 +53,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
     public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
 
+    public static final String CONVERSION_SERVICE_BEAN_NAME = "conversionService";
+
     private ApplicationEventMulticaster applicationEventMulticaster;
 
     /**
@@ -71,18 +74,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
      */
     @Override
     public void refresh() throws BeanException {
-        // 1. 创建BeanFactory，并加载BeanDefinition
+        // 创建BeanFactory，并加载BeanDefinition
         refreshBeanFactory();
         ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 
-        //添加ApplicationContextAwareProcessor，让继承自ApplicationContextAware的bean能感知bean
+        // 添加ApplicationContextAwareProcessor，让继承自ApplicationContextAware的bean能感知bean
         beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 
 
-        // 2. 在bean实例化之前，执行BeanFactoryPostProcessor
+        // 在bean实例化之前，执行BeanFactoryPostProcessor
         invokeBeanFactoryPostProcessors(beanFactory);
 
-        // 3. BeanPostProcessor需要提前与其他bean实例化之前注册
+        // BeanPostProcessor需要提前与其他bean实例化之前注册
         registerBeanPostProcessors(beanFactory);
 
         // 初始化事件发布者
@@ -91,8 +94,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         // 注册事件监听器
         registerListeners();
 
-        // 4. 提前实例化单例bean，其实就是从缓存里面拿
-        beanFactory.preInstantiateSingletons();
+        // 注册类型转换器和提前实例化单例bean 和 提前实例化单例bean，其实就是从缓存里面拿
+        finishBeanFactoryInitialization(beanFactory);
 
         // 发布容器刷新完成事件
         finishRefresh();
@@ -182,6 +185,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         applicationEventMulticaster.multicastEvent(event);
     }
 
+    @Override
+    public boolean containsBean(String name) {
+        return getBeanFactory().containsBean(name);
+    }
+
     /**
      * 根据名称和类型获取Bean
      * 
@@ -241,6 +249,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         return getBeanFactory().getBeanDefinitionNames();
     }
 
+    protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+        //设置类型转换器
+        if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME)) {
+            Object conversionService = beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME);
+            if (conversionService instanceof ConversionService) {
+                beanFactory.setConversionService((ConversionService) conversionService);
+            }
+        }
+
+        //提前实例化单例bean
+        beanFactory.preInstantiateSingletons();
+    }
+
     /**
      * 刷新BeanFactory - 抽象方法
      * 
@@ -267,6 +288,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
      * @return 可配置的BeanFactory实例
      */
     public abstract ConfigurableListableBeanFactory getBeanFactory();
+
 
     public void close(){
         doClose();

@@ -3,6 +3,7 @@ package org.winterframework.beans.factory.support;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.TypeUtil;
 import org.winterframework.beans.BeanException;
 import org.winterframework.beans.PropertyValues;
 import org.winterframework.beans.factory.BeanFactoryAware;
@@ -13,6 +14,7 @@ import org.winterframework.beans.factory.config.BeanDefinition;
 import org.winterframework.beans.factory.config.BeanPostProcessor;
 import org.winterframework.beans.factory.config.BeanReference;
 import org.winterframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.winterframework.core.convert.ConversionService;
 
 import java.lang.reflect.Method;
 
@@ -346,8 +348,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * 
      * 实现原理：
      * 1. 遍历BeanDefinition中的所有PropertyValue
-     * 2. 使用Hutool的BeanUtil.setFieldValue()方法设置字段值
-     * 3. 支持基本类型、包装类型、String等常见类型的自动转换
+     * 2. 若属性值是Bean引用则先解析依赖；否则尝试通过ConversionService做类型转换
+     * 3. 使用Hutool的BeanUtil.setFieldValue()方法设置字段值
+     * 4. 支持基本类型、包装类型、String等常见类型的自动转换
      * 
      * 技术特点：
      * - 使用Hutool工具库简化反射操作
@@ -369,6 +372,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
                     // beanA依赖beanB，先实例化beanB
                     BeanReference beanReference = (BeanReference) value;
                     value = getBean(beanReference.getBeanName());
+                }else {
+                    // 非Bean引用：根据字段声明类型，走ConversionService完成类型转换（如String->Integer）
+                    Class<?> sourceType = value.getClass();
+                    Class<?> targetType =  (Class<?>) TypeUtil.getFieldType(bean.getClass(), name);
+                    ConversionService conversionService = getConversionService();
+                    if (conversionService != null){
+                        if (conversionService.canConvert(sourceType,targetType)){
+                            value = conversionService.convert(value,targetType);
+                        }
+                    }
                 }
                 // 使用Hutool工具库设置字段值
                 // 支持类型自动转换和字段名匹配
